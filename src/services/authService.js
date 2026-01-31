@@ -23,7 +23,7 @@ class AuthService {
     const token = crypto.randomBytes(32).toString('hex');
     await ActivationToken.create({ user: user._id, token });
 
-    await EmailService.sendActivationEmail(user.email, token);
+    await EmailService.sendActivationEmail(user.email, token, user.firstName);
 
     return user;
   }
@@ -60,7 +60,7 @@ class AuthService {
     const token = crypto.randomBytes(32).toString('hex');
     await PasswordResetToken.create({ user: user._id, token });
 
-    await EmailService.sendPasswordResetEmail(user.email, token);
+    await EmailService.sendPasswordResetEmail(user.email, token, user.firstName);
   }
 
   static async getResetPasswordInfo(token) {

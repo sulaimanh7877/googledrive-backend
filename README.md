@@ -1,9 +1,26 @@
 # Cloud Web Drive – Backend
 
+<p align="center">
+  <img src="https://cloud-web-drive.web.app/favicon.png" alt="Cloud Web Drive Logo" width="96" />
+</p>
+
 ## Overview
-Cloud Web Drive is a **Google Drive–inspired cloud storage prototype** built with a secure, scalable backend architecture. The backend is responsible for authentication, authorization, file and folder metadata management, AWS S3 integration, and storage quota enforcement.
+Cloud Web Drive is a **Google Drive–inspired cloud storage prototype** built with a secure, scalable backend architecture and a modern frontend. The platform supports authentication, authorization, file and folder management, AWS S3 integration, storage quota enforcement, and **Progressive Web App (PWA)** capabilities.
 
 > **Prototype Notice**: This system is intentionally configured with **lower storage limits** to prevent misuse and abuse. The architecture, however, is designed to scale.
+
+---
+
+## 🌐 Live Prototype & PWA
+
+🚀 **Prototype Website:**
+- https://cloud-web-drive.web.app
+
+📱 **Progressive Web App (PWA):**
+- Installable on **desktop and mobile** (Chrome, Edge, Android)
+- Offline-ready shell via Service Worker
+- Standalone app experience (no browser UI)
+- Explicit **Install App** button inside the UI
 
 ---
 
@@ -48,6 +65,10 @@ Cloud Web Drive is a **Google Drive–inspired cloud storage prototype** built w
 ---
 
 ## File & Folder Management
+
+- Fully functional **PWA file manager experience**
+- Responsive UI optimized for desktop and mobile
+- Clean breadcrumb navigation for deeply nested folders
 
 - Files uploaded to **AWS S3** using pre-signed URLs
 - Only file metadata stored in MongoDB
@@ -140,6 +161,10 @@ npm start
 ---
 
 ## Notes
+
+- This application is a **Progressive Web App (PWA)** and can be installed like a native app
+- Designed to demonstrate **real-world cloud storage architecture & UX**
+- Frontend and backend are intentionally clean, modular, and production-inspired
 
 - This backend follows **real-world cloud storage patterns**
 - Designed for extensibility (sharing, versioning, plans)
