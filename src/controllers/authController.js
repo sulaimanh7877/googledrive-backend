@@ -26,6 +26,8 @@ exports.login = catchAsync(async (req, res, next) => {
     user: {
       id: user._id,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
     },
   });
 });
@@ -36,6 +38,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     success: true,
     message: 'Password reset link sent to email',
   });
+});
+
+exports.getResetPasswordInfo = catchAsync(async (req, res, next) => {
+  const info = await AuthService.getResetPasswordInfo(req.params.token);
+  res.status(200).json({ success: true, ...info });
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {

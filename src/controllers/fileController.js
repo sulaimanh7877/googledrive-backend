@@ -9,7 +9,9 @@ exports.getUploadUrl = catchAsync(async (req, res, next) => {
 
 exports.getStorageUsage = catchAsync(async (req, res, next) => {
   const totalUsage = await FileService.getUsage(req.user.id);
-  res.status(200).json({ success: true, totalUsage });
+  const limitMb = Number(process.env.STORAGE_LIMIT_MB) || 250;
+  const limit = limitMb * 1024 * 1024;
+  res.status(200).json({ success: true, totalUsage, limit });
 });
 
 exports.saveMetadata = catchAsync(async (req, res, next) => {

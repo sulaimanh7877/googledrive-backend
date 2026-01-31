@@ -63,9 +63,20 @@ class AuthService {
     await EmailService.sendPasswordResetEmail(user.email, token);
   }
 
+  static async getResetPasswordInfo(token) {
+    const resetRecord = await PasswordResetToken.findOne({ token }).populate('user');
+    if (!resetRecord) throw new AppError('Invalid or expired reset token', 400);
+    return { email: resetRecord.user.email };
+  }
+
   static async resetPassword(token, newPassword) {
     const resetRecord = await PasswordResetToken.findOne({ token }).populate('user');
     if (!resetRecord) throw new AppError('Invalid or expired reset token', 400);
+
+    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!strongPassword.test(newPassword)) {
+      throw new AppError('Password must be at least 8 characters and include uppercase, lowercase, and a number', 400);
+    }
 
     const user = resetRecord.user;
     user.password = newPassword;

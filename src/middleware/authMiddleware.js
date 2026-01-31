@@ -25,6 +25,6 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new AppError('User account is not active', 403));
   }
 
-  req.user = currentUser;
+  req.user = currentUser; 
   next();
 });

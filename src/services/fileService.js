@@ -17,7 +17,8 @@ class FileService {
   static async getUploadUrl(userId, fileName, mimeType, folderId, size = 0) {
     // 1. Check Quota (300MB)
     const currentUsage = await this.getUsage(userId);
-    const LIMIT = 300 * 1024 * 1024;
+    const limitMb = Number(process.env.STORAGE_LIMIT_MB) || 250;
+    const LIMIT = limitMb * 1024 * 1024;
     
     if (currentUsage + size > LIMIT) {
       throw new AppError('Storage quota exceeded (300MB limit)', 400);

@@ -33,8 +33,12 @@ router.post('/forgot-password', validateRequest([
   check('email').isEmail()
 ]), authController.forgotPassword);
 
+router.get('/reset-password/:token/info', authController.getResetPasswordInfo);
+
 router.post('/reset-password/:token', validateRequest([
-  check('newPassword').isLength({ min: 8 })
+  check('newPassword')
+    .isLength({ min: 8 })
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
 ]), authController.resetPassword);
 
 module.exports = router;
