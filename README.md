@@ -1,115 +1,152 @@
-# Secure Cloud Backend
+# Cloud Web Drive – Backend
 
-This is a production-ready Node.js backend blueprint implementing secure file storage, folder management, and user authentication using MongoDB, Express, JWT, AWS S3, and AWS SES.
+## Overview
+Cloud Web Drive is a **Google Drive–inspired cloud storage prototype** built with a secure, scalable backend architecture. The backend is responsible for authentication, authorization, file and folder metadata management, AWS S3 integration, and storage quota enforcement.
 
-## 🚀 Features
+> **Prototype Notice**: This system is intentionally configured with **lower storage limits** to prevent misuse and abuse. The architecture, however, is designed to scale.
 
-- **Authentication**: User registration, email activation, login, password reset.
-- **Security**: JWT protection, Helmet, Rate Limiting, Mongo Sanitization, Bcrypt hashing.
-- **File Storage**: AWS S3 integration using Signed URLs (Private bucket, no server-side file streaming).
-- **Metadata**: MongoDB storage for file and folder hierarchies.
-- **Email**: AWS SES integration for transactional emails.
+---
 
-## 🛠️ Tech Stack
+## Technologies Used
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB (Mongoose)
-- **Cloud**: AWS S3 (Storage), AWS SES (Email)
-- **Auth**: JWT, Bcrypt.js
+- **Node.js** – Server-side runtime
+- **Express.js** – REST API framework
+- **MongoDB Atlas** – Cloud database for persistent storage
+- **Mongoose** – ODM for MongoDB
+- **AWS S3** – Object storage for files
+- **JWT (JSON Web Tokens)** – Authentication & authorization
+- **bcrypt** – Secure password hashing
+- **AWS SES (Simple Email Service)** – Transactional email delivery for account activation and password reset
 
-## 📋 Prerequisites
+---
 
-1. **Node.js** (v16+)
-2. **MongoDB** (Local or Atlas connection string)
-3. **AWS Account** with:
-   - S3 Bucket (Private)
-   - SES Verified Sender Identity
-   - IAM User credentials with permissions for S3 and SES.
+## Authentication & Security Features
 
-## ⚙️ Installation & Setup
+### User Registration & Activation
+- Email address used as **unique username**
+- Passwords are **hashed using bcrypt** before storage
+- Two-step activation workflow:
+  1. User registers → account created as **inactive**
+  2. Activation email sent with secure token
+  3. Account becomes active only after link verification
+- Only **activated users** are allowed to log in
 
-1. **Clone the repository**
-   ```bash
-   git clone <repo-url>
-   cd secure-cloud-backend
-   ```
+### Login Protection
+- Login blocked for:
+  - Non-existent users
+  - Inactive accounts
+  - Invalid credentials
+- Meaningful error messages returned to the client
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### Forgot Password Workflow
+- Email validation before reset request
+- Secure, randomly generated reset token
+- Token stored temporarily in MongoDB
+- Token expires automatically and is **single-use**
+- Token invalidated immediately after password reset
 
-3. **Configure Environment Variables**
-   Duplicate the example file and rename it to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Fill in your credentials in `.env`:
-   ```env
-   PORT=5000
-   MONGO_URI=mongodb://localhost:27017/my_secure_app
+---
 
-   # JWT Settings
-   JWT_SECRET=your_super_secure_random_string
-   JWT_EXPIRES_IN=30m
+## File & Folder Management
 
-   # AWS Settings
-   AWS_REGION=us-east-1
-   AWS_ACCESS_KEY_ID=your_aws_access_key
-   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-   AWS_S3_BUCKET_NAME=your_bucket_name
-   AWS_SES_SENDER_EMAIL=verified_sender@example.com
-   ```
+- Files uploaded to **AWS S3** using pre-signed URLs
+- Only file metadata stored in MongoDB
+- Folder hierarchy preserved using parent–child relationships
+- Full folder path reconstruction supported
+- Ownership enforced at API level (users can only access their own data)
 
-4. **Run the Server**
-   
-   Development mode (using nodemon):
-   ```bash
-   npm run dev
-   ```
+---
 
-   Production start:
-   ```bash
-   npm start
-   ```
+## Storage Management
 
-## 📡 API Endpoints
+- Per-user storage usage tracking
+- Configurable storage limit via environment variables
+- Upload requests blocked when quota is exceeded
+- Backend acts as the **single source of truth** for storage limits
 
-### Authentication
-- `POST /api/auth/register` - Register new user (sends activation email)
-- `GET /api/auth/activate/:token` - Activate account
-- `POST /api/auth/login` - Login and receive JWT
-- `POST /api/auth/forgot-password` - Request password reset link
-- `POST /api/auth/reset-password/:token` - Reset password
+---
 
-### Folders (Protected)
-- `POST /api/folders` - Create a new folder
-- `GET /api/folders/:folderId` - Get folder contents (subfolders & files)
-- `DELETE /api/folders/:folderId` - Delete folder recursively
+## Edge Cases Handled
 
-### Files (Protected)
-- `POST /api/files/upload-url` - Get signed S3 PUT URL
-- `POST /api/files` - Save file metadata after S3 upload
-- `GET /api/files?folderId=xyz` - List files
-- `GET /api/files/:fileId/download` - Get signed S3 GET URL
-- `DELETE /api/files/:fileId` - Delete file from S3 and DB
+- Duplicate email registration
+- Login attempt before account activation
+- Expired or reused activation/reset tokens
+- Upload exceeding storage quota
+- File name conflicts within the same folder
+- Unauthorized access to files or folders
+- Invalid or tampered tokens
 
-## 🧪 Testing the Flow
+---
 
-1. **Register**: Send POST to `/register`. Check your console (if mocking email) or inbox for the link.
-2. **Activate**: Hit the activation URL.
-3. **Login**: Get the `token`.
-4. **Upload File**:
-   - POST `/api/files/upload-url` to get `uploadUrl`.
-   - PUT binary file data directly to that `uploadUrl`.
-   - POST `/api/files` to save metadata.
-5. **Download**: GET `/api/files/:id/download` to get a temporary link.
+## Environment Variables
 
-## 🛡️ Security Notes
+```env
+PORT=5000
 
-- Ensure your S3 bucket has **Block Public Access** enabled.
-- The S3 CORS configuration must allow methods (PUT, GET) from your client domain.
-- `helmet` is used to secure HTTP headers.
-- Rate limiting is applied to `/api` routes.
+# ==============================
+# Database (MongoDB Atlas)
+# ==============================
+MONGO_URI=mongodb+srv://<DB_USER>:<DB_PASSWORD>@<CLUSTER_NAME>.mongodb.net/<DB_NAME>?retryWrites=true&w=majority
+
+# ==============================
+# Authentication (JWT)
+# ==============================
+JWT_SECRET=<YOUR_JWT_SECRET>
+JWT_EXPIRES_IN=30m
+
+# ==============================
+# AWS Configuration
+# ==============================
+AWS_REGION=<AWS_REGION>
+AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
+AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
+AWS_S3_BUCKET_NAME=<AWS_S3_BUCKET_NAME>
+AWS_SES_SENDER_EMAIL=<VERIFIED_SENDER_EMAIL>
+
+FRONTEND_URL=http://localhost:5173
+
+STORAGE_LIMIT_MB=250
+```
+
+---
+
+## Running the Backend
+
+### Development Mode
+
+```bash
+npm install
+npm run dev
+```
+
+- Starts the server using **nodemon**
+- Auto-reloads on code changes
+- Intended for local development
+
+---
+
+### Production Mode
+
+```bash
+npm install
+npm start
+```
+
+- Runs the server in production mode
+- Optimized for stability and performance
+- Environment variables must be configured correctly
+
+
+---
+
+## Notes
+
+- This backend follows **real-world cloud storage patterns**
+- Designed for extensibility (sharing, versioning, plans)
+- Suitable for academic evaluation and portfolio demonstration
+
+---
+
+## License
+
+This project is a **prototype developed for educational and demonstration purposes**.
