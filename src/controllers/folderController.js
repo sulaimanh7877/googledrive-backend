@@ -13,6 +13,12 @@ exports.getContents = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, ...contents });
 });
 
+exports.resolvePath = catchAsync(async (req, res, next) => {
+  const { path, baseFolderId } = req.body;
+  const folderId = await FolderService.resolvePath(req.user.id, path, baseFolderId || null);
+  res.status(200).json({ success: true, folderId });
+});
+
 exports.deleteFolder = catchAsync(async (req, res, next) => {
   await FolderService.deleteFolder(req.user.id, req.params.folderId);
   res.status(200).json({ success: true, message: 'Folder deleted' });

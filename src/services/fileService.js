@@ -21,7 +21,7 @@ class FileService {
     const LIMIT = limitMb * 1024 * 1024;
     
     if (currentUsage + size > LIMIT) {
-      throw new AppError('Storage quota exceeded (300MB limit)', 400);
+      throw new AppError(`Storage quota exceeded (${limitMb}MB limit)`, 400);
     }
 
     if (folderId) {

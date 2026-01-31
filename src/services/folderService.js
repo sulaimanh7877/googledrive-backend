@@ -4,6 +4,31 @@ const S3Service = require('./s3Service');
 const AppError = require('../utils/AppError');
 
 class FolderService {
+  static async resolvePath(userId, path, baseFolderId = null) {
+    const parts = path.split('/').filter(Boolean);
+    let parentFolderId = baseFolderId;
+
+    for (const part of parts) {
+      let folder = await Folder.findOne({
+        ownerId: userId,
+        parentFolderId: parentFolderId,
+        name: part
+      });
+
+      if (!folder) {
+        folder = await Folder.create({
+          name: part,
+          parentFolderId,
+          ownerId: userId
+        });
+      }
+
+      parentFolderId = folder._id;
+    }
+
+    return parentFolderId;
+  }
+
   static async createFolder(userId, name, parentFolderId) {
     if (parentFolderId) {
       const parent = await Folder.findOne({ _id: parentFolderId, ownerId: userId });
