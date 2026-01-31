@@ -70,19 +70,34 @@ class AuthService {
   }
 
   static async resetPassword(token, newPassword) {
-    const resetRecord = await PasswordResetToken.findOne({ token }).populate('user');
+    const resetRecord = await PasswordResetToken.findOne({ token }).populate({ path: 'user', select: '+password' });
     if (!resetRecord) throw new AppError('Invalid or expired reset token', 400);
 
-    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!strongPassword.test(newPassword)) {
-      throw new AppError('Password must be at least 8 characters and include uppercase, lowercase, and a number', 400);
+    // Explicit expiry check
+    const ONE_HOUR = 60 * 60 * 1000;
+    if (Date.now() - resetRecord.createdAt.getTime() > ONE_HOUR) {
+      await PasswordResetToken.deleteOne({ _id: resetRecord._id });
+      throw new AppError('Invalid or expired reset token', 400);
     }
 
     const user = resetRecord.user;
+
+    // Prevent password reuse
+    const isSamePassword = await user.correctPassword(newPassword, user.password);
+    if (isSamePassword) {
+      throw new AppError('New password must be different from the old password', 400);
+    }
+
+    // Invalidate token BEFORE password update
+    await PasswordResetToken.deleteOne({ _id: resetRecord._id });
+
     user.password = newPassword;
     await user.save();
 
-    await PasswordResetToken.deleteOne({ _id: resetRecord._id });
+    return {
+      message: 'Password updated successfully. Please log in again.',
+      loginRequired: true
+    };
   }
 }
 

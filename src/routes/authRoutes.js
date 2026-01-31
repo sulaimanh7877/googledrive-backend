@@ -38,7 +38,10 @@ router.get('/reset-password/:token/info', authController.getResetPasswordInfo);
 router.post('/reset-password/:token', validateRequest([
   check('newPassword')
     .isLength({ min: 8 })
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
+  check('confirmPassword')
+    .custom((value, { req }) => value === req.body.newPassword)
+    .withMessage('Passwords do not match')
 ]), authController.resetPassword);
 
 module.exports = router;
