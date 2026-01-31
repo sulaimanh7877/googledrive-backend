@@ -14,7 +14,19 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new AppError('You are not logged in', 401));
   }
 
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  let decoded;
+  try {
+    decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return next(new AppError('Your session has expired. Please log in again.', 401));
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return next(new AppError('Invalid token. Please log in again.', 401));
+    }
+    throw err;
+  }
+
   const currentUser = await User.findById(decoded.id);
 
   if (!currentUser) {
@@ -25,6 +37,6 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(new AppError('User account is not active', 403));
   }
 
-  req.user = currentUser; 
+  req.user = currentUser;
   next();
 });
