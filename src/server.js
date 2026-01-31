@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(mongoSanitize());
 
 const limiter = rateLimit({
-  max: 100,
+  max: 500,
   windowMs: 5 * 60 * 1000,
   message: 'Too many requests from this IP, please try again sometime later!'
 });
