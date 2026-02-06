@@ -7,6 +7,8 @@
 ## Overview
 Cloud Web Drive is a **Google Drive–inspired cloud storage prototype** built with a secure, scalable backend architecture and a modern frontend. The platform supports authentication, authorization, file and folder management, AWS S3 integration, storage quota enforcement, and **Progressive Web App (PWA)** capabilities.
 
+**Frontend Repository:** https://github.com/sulaimanh7877/googledrive-frontend
+
 > **Prototype Notice**: This system is intentionally configured with **lower storage limits** to prevent misuse and abuse. The architecture, however, is designed to scale.
 
 ---
